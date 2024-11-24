@@ -19,10 +19,10 @@ if(not exists):
 	conf = {
 		"path": "/usr/share/dockerManager",
 		"groups": {
-			"none": {"ports": ()}
+			"none": {"ports":[])}
 		},
 		"servers": {
-			#"none": {"ports": (), "group": "none"}
+			#"none": {"ports": [], "group": "none"}
 		}
 	}
 	file.write(json.dumps(conf, sort_keys=True, indent=4))
@@ -51,7 +51,7 @@ while(True):
 					port = "" #input("port: ")
 					link = input("link to minecraft jar: ")
 					run([conf["path"] + "/create", name, conf["path"] + "/setup/minecraft", link, port])
-					conf["servers"][name] = {"ports": ((port if port != "" else "25565")), "group": (group if group != "" else "none")}
+					conf["servers"][name] = {"ports": [(port if port != "" else "25565")], "group": (group if group != "" else "none")}
 
 				case "mindustry":
 					print("If you type nothing to config it will be set to default.")
@@ -66,7 +66,7 @@ while(True):
 					except: print("invalid version")
 					else:
 						run(conf["path"] + "/create", name, conf["path"] + "/setup/mindustry", ver, port)
-						conf["servers"][name] = {"ports": ((port if port != "" else "6567")), "group": (group if group != "" else "none")}
+						conf["servers"][name] = {"ports": [(port if port != "" else "6567")], "group": (group if group != "" else "none")}
 
 				case "help":
 					print("available servers: minecraft, mindustry")
