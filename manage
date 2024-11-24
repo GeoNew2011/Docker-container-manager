@@ -53,6 +53,7 @@ while(True):
 
 				case "mindustry":
 					print("If you type nothing to config it will be set to default.")
+					print("all spaces in name will be replased with _")
 					name = input("name: ")
 					print("Group is unifying server by similar settings. Default group is none")
 					group = input("group: ")
@@ -81,8 +82,8 @@ while(True):
 			else:
 				args = ""
 				for i in conf["servers"][arg]["ports"]:
-					args += " -p" + i
-				run(["/usr/bin/docker", "run", "-itd", "--user", "server", "--name", arg.upper()] + args.split() + [arg, "bash", "-c", f"\"cd; ./server\""])
+					args += " -p " + i + ":" + i + " -p " + i + ":" + i + "/udp"
+				run(["/usr/bin/docker", "run", "-itd", "--user", "server", "--name", arg.upper()] + args.split() + [arg, "bash", "-c", f"cd; ./server"])
 				print("Launched.")
 
 		case "stop":
