@@ -26,7 +26,7 @@ if(not exists):
 	}
 
 configFile = open("/etc/dockerManagerConfig.json", "r+")
-conf = json.load(configFile.read())
+conf = json.loads(configFile.read())
 print("Welcome to Docker container manager V1.0")
 print(f"For help type \"help\"")
 while(True):
