@@ -3,6 +3,14 @@ import os
 import sys
 import json
 
+if	(sys.platform != "linux"):
+	print("Docker only available on Linux")
+	os.exit(1)
+
+if (os.geteuid() != 0):
+	print("Docker requires root privileges and this manager too")
+	os.exit(13)
+
 exists = os.path.isfile("/etc/dockerManagerConfig.json")
 if(not exists):
 	os.system("rm -rf /etc/dockerManagerConfig.json")
@@ -24,9 +32,11 @@ print(f"For help type \"help\"")
 while(True):
 	command = input()
 	match command:
+
 		case "create":
 			arg = input()
 			match arg:
+
 				case "minecraft":
 					print("If you type nothing to config it will be set to default.")
 					print("all spaces in name will be replased with _")
@@ -35,17 +45,19 @@ while(True):
 					group = input("group: ")
 					port = input("port: ")
 					link = input("link to minecraft jar: ")
-					os.execl(conf["path"] + "/create", config["path"] + "/install/minecraft", name, link, port)
+					os.execl(conf["path"] + "/create", conf["path"] + "/install/minecraft", name, link, port)
 					conf["servers"][name] = {"ports": ((port if port != "" else "25565")), "group": (group if group != "" else "none")}
+
 				case "mindustry":
-                                        print("If you type nothing to config it will be set to default.")
-                                        name = input("name: ")
-                                        print("Group is unifying server by similar settings. Default group is none")
-                                        group = input("group: ")
-                                        port = input("port: ")
-                                        link = input("mindustry version(without v): ")
-                                        os.execl(conf["path"] + "/create", config["path"] + "/install/mindustry", name, link, port)
-                                        conf["servers"][name] = {"ports": ((port if port != "" else "6567")), "group": (group if group != "" else "none")}
+					print("If you type nothing to config it will be set to default.")
+					name = input("name: ")
+					print("Group is unifying server by similar settings. Default group is none")
+					group = input("group: ")
+					port = input("port: ")
+					link = input("mindustry version(without v): ")
+					os.execl(conf["path"] + "/create", conf["path"] + "/install/mindustry", name, link, port)
+					conf["servers"][name] = {"ports": ((port if port != "" else "6567")), "group": (group if group != "" else "none")}
+
 				case "help":
 					print("available servers: minecraft, mindustry")
 					print("name - name of the server")
@@ -53,8 +65,10 @@ while(True):
 					print("port - port on which server will be available")
 					print("minecraft link - link where minecraft jar will be downloaded")
 					print("mindustry version - number of mindustry release")
+
 				case _:
 					print("type of server not found")
+
 		case "start":
 			arg = input()
 			try:
@@ -65,26 +79,29 @@ while(True):
 				args = ""
 				for i in conf["server"][arg]["ports"]:
 					args += " -p" + i
-				os.execv("/usr/bin/docker", "run " + arg + "-itd --name " + upper(arg) + args)
+				os.execv("/usr/bin/docker", "run " + arg + "-itd --name " + arg.upper() + args)
 				print("Launched.")
+
 		case "stop":
 			arg = input()
 			try:
 				server = conf["servers"][arg]
 			except:
-                                print("Server not found.")
-                        else:
-				os.execv("/usr/bin/docker", "stop" + upper(arg)
-				print("Stopped.")
-		case "attach":
-			arg = input()
-                        try:
-                                server = conf["servers"][arg]
-                        except:
 				print("Server not found.")
 			else:
-				print("Type docker attach " + upper(arg) + " to attach to server console")
-				print("To detatch press Control-P + Control-Q")
+				os.execv("/usr/bin/docker", "stop" + arg.upper())
+				print("Stopped.")
+
+		case "attach":
+			arg = input()
+			try:
+				server = conf["servers"][arg]
+			except:
+				print("Server not found.")
+			else:
+				print("Type docker attach " + arg.upper() + " to attach to server console")
+				print("To detach press Control-P + Control-Q")
+
 		case "save":
 			arg = input()
 			try:
@@ -92,23 +109,54 @@ while(True):
 			except:
 				print("Server not found.")
 			else:
-				os.execv("/usr/bin/docker", "commit " + upper(arg) + " " + arg)
+				os.execv("/usr/bin/docker", "commit " + arg.upper() + " " + arg)
 				print("Done.")
+
 		case "remove":
 			arg = input()
 			try:
-				server = conf[["servers"][arg]
+				server = conf["servers"][arg]
 			except:
 				print("Server not found.")
 			else:
-				os.execv("/usr/bin/docker", 
+				os.execv("/usr/bin/docker", "remove " + arg.upper())
+				print("Removed.")
+
+		case "delete":
+			arg = input()
+			try:
+				server = conf["servers"][arg]
+			except:
+				print("Server not found.")
+			else:
+				os.execv("/usr/bin/docker", "rmi " + arg.upper())
+				conf["servers"].remove(arg)
+				print("Deleted.")
+
+		case "clear":
+			os.execv("/usr/bin/docker", "prune")
+			print("Cleared.")
+
+		case "config":
+			arg = input()
+			match arg:
+				case "path":
+					path = input("path to directory: ")
+					if (os.path.isdir(path)):
+						conf["path"] = path
+					else: print("Given path does not exists.")
+				case "help":
+					print("path - path to directory where scripts for creating container placed")
+
 		case "exit":
+			configFile.write(json.dumps(conf, sort_keys=True, indent=4))
 			sys.exit(0)
+
 		case "help":
 			print("Use help in command to get available options")
 			print("create - create new image")
 			print("start - start container from image")
-			print("stop - stop container(still can be saved")
+			print("stop - stop container(still can be saved)")
 			print("attach - attach to container's console")
 			print("save - save container to image")
 			print("remove - remove stopped container")
@@ -117,6 +165,7 @@ while(True):
 			print("config - change config of groups, containers, manager")
 			print("exit - exit manager")
 			print("help - print this message")
+
 		case _:
 			print("Unrecognized command. For command list type help")
 
