@@ -24,6 +24,7 @@ if(not exists):
 			#"none": {"ports": (), "group": "none"}
 		}
 	}
+	file.write(json.dumps(conf))
 
 configFile = open("/etc/dockerManagerConfig.json", "r+")
 conf = json.loads(configFile.read())
