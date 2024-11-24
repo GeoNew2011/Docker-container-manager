@@ -19,7 +19,7 @@ if(not exists):
 	conf = {
 		"path": "/usr/share/dockerManager",
 		"groups": {
-			"none": {"ports":[])}
+			"none": {"ports":[]}
 		},
 		"servers": {
 			#"none": {"ports": [], "group": "none"}
