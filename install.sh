@@ -31,3 +31,10 @@ fi
 
 docker run hello-world
 echo "Docker is working properly"
+echo "Installing manager..."
+curl "https://github.com/GeoNew2011/Docker-container-manager/releases/download/v1.0/scripts.tar.gz" -o scripts.tar.gz
+mkdir /usr/share/dockerManager
+tar -xzf scripts.tar.gz -C /usr/share/dockerManager
+chmod -R u+x /usr/share/dockerManager
+mv /usr/share/dockerManager/manage $HOME
+echo "Run ./manage to start manager"
