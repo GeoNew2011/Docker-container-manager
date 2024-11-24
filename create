@@ -1,0 +1,9 @@
+#!/usr/bin/bash
+export args=$3" "$4" "$5
+docker run -itd --name DEBIAN debian bash
+docker cp $2 DEBIAN:/install.sh
+docker exec -it DEBIAN chmod +x /install.sh
+docker exec -it DEBIAN bash /install.sh $args
+docker commit DEBIAN $1
+docker stop DEBIAN
+docker remove DEBIAN

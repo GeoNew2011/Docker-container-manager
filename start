@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+export args=""
+export command="/server"
+if [ ! -z $3 ]
+	then export args=$args"-p "$3" "
+fi
+if [ ! -z $4 ]
+        then export args=$args"-p "$4" "
+fi
+if [ ! -z $5 ]
+        then export args=$args"-p "$5" "
+	echo a
+fi
+if [ ! -z $2 ]
+	then export command=$2
+fi
+
+docker run -itd $args --name ${1^^} $1 $command
+echo "to detatch press ^P^Q"
+docker attach ${1^^}
