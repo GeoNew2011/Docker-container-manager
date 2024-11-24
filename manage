@@ -3,22 +3,22 @@ import os
 import sys
 import json
 
-#exists = os.path.isfile("/etc/dockerManagerConfig.json")
-#if(not exists):
-	#os.system("rm -rf /etc/dockerManagerConfig.json")
-	#file = open("/etc/dockerManagerConfig.json", "w+")
-	#conf = {
-	#	"path": "/usr/share/dockerManager",
-	#	"groups": {
-	#		"none": {"ports": ()}
-	#	},
-	#	"servers": {
-	#		#"none": {"ports": (), "group": "none"}
-	#	}
-	#}
+exists = os.path.isfile("/etc/dockerManagerConfig.json")
+if(not exists):
+	os.system("rm -rf /etc/dockerManagerConfig.json")
+	file = open("/etc/dockerManagerConfig.json", "w+")
+	conf = {
+		"path": "/usr/share/dockerManager",
+		"groups": {
+			"none": {"ports": ()}
+		},
+		"servers": {
+			#"none": {"ports": (), "group": "none"}
+		}
+	}
 
-#configFile = open("/etc/dockerManagerConfig.json", "r+")
-#conf = json.load(configFile.read())
+configFile = open("/etc/dockerManagerConfig.json", "r+")
+conf = json.load(configFile.read())
 print("Welcome to Docker container manager V1.0")
 print(f"For help type \"help\"")
 while(True):
