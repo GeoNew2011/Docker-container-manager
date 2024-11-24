@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+export ver=$1
+export port=$2
+if [ $1=="" ]
+        then export ver="146"
+fi
+if [ $2=="" ]
+        then export port="6567"
+fi
+
+apt-get update
+apt-get install -y openjdk-17-jre-headless nano net-tools vim wget
+useradd server -m -s /usr/bin/bash
+wget "https://github.com/Anuken/Mindustry/releases/download/v"$ver"/server-release.jar" -O /home/server/server.jar
+java -jar /home/server/server.jar config port $port,exit
+touch /home/server/server
+echo "#!/usr/bin/sh" >> /home/server/server
+echo "java -jar server.jar" >> /home/server/server
+chmod +x /home/server/server
+chown -R server /home/server

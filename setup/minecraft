@@ -1,0 +1,14 @@
+#!/usr/bin/bash
+export server=$1
+if [ $1=="" ]
+	then export server="https://piston-data.mojang.com/v1/objects/45810d238246d90e811d896f87b14695b7fb6839/server.jar"
+fi
+apt-get update
+apt-get install -y openjdk-21-jre-headless nano net-tools vim wget
+useradd server -m -s /usr/bin/bash
+wget $server -O /home/server/server.jar
+touch /home/server/server
+echo "#!/usr/bin/sh" >> /home/server/server
+echo "java -Xmx1024M -Xms1024M -jar server.jar nogui" >> /home/server/server
+chmod +x /home/server/server
+chown -R server /home/server
