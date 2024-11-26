@@ -4,17 +4,24 @@ import os
 import sys
 import json
 
+def getArg():
+	try:
+		arg = command[1]
+	except IndexError:
+		arg = input(" ")
+	return arg
+
 if	(sys.platform != "linux"):
 	print("Docker only available on Linux")
-	os.exit(1)
+	exit(1)
 
 if (os.geteuid() != 0):
 	print("Docker requires root privileges and this manager too")
-	os.exit(13)
+	exit(13)
 
 exists = os.path.isfile("/etc/dockerManagerConfig.json")
 if(not exists):
-	os.system("rm -rf /etc/dockerManagerConfig.json")
+	os.system("rm -rf /data-data/com.termux/files/etc/dockerManagerConfig.json")
 	file = open("/etc/dockerManagerConfig.json", "w+")
 	conf = {
 		"path": "/usr/share/dockerManager",
@@ -34,66 +41,77 @@ configFile.close()
 print("Welcome to Docker container manager V1.0")
 print(f"For help type \"help\"")
 while(True):
-	command = input()
-	match command:
+	command = input().split()
+	try:
+		command[0]
+	except IndexError:
+		command = [""]
+	match command[0]:
 
 		case "create":
-			arg = input()
-			match arg:
+			match getArg():
 
 				case "minecraft":
-					print("If you type nothing to config it will be set to default.")
-					print("all spaces in name will be replased with _")
-					name = input("name: ")
+					print("  If you type nothing to config it will be set to default.")
+					print("  all spaces in name will be replased with _")
+					name = input("  name: ")
 					name = name.replace(" ", "_")
-					#print("Group is unifying server by similar settings. Default group is none")
-					group = "" #input("group: ")
+					print("Group is unifying server by similar settings. Default group is none")
+					group = input("group: ")
 					port = "" #input("port: ")
-					link = input("link to minecraft jar: ")
+					link = input("  link to minecraft jar: ")
 					run([conf["path"] + "/create", name, conf["path"] + "/setup/minecraft", link, port])
 					conf["servers"][name] = {"ports": [(port if port != "" else "25565")], "group": (group if group != "" else "none")}
 
 				case "mindustry":
-					print("If you type nothing to config it will be set to default.")
-					print("all spaces in name will be replased with _")
-					name = input("name: ")
+					print("  If you type nothing to config it will be set to default.")
+					print("  all spaces in name will be replased with _")
+					name = input("  name: ")
 					name = name.replace(" ", "_")
-					#print("Group is unifying server by similar settings. Default group is none")
-					group = "" #input("group: ")
-					port = input("port: ")
-					ver = input("mindustry version(without v): ")
+					print("Group is unifying server by similar settings. Default group is none")
+					group = input("group: ")
+					port = input("  port: ")
+					ver = input("  mindustry version(without v): ")
 					try: int(ver)
-					except: print("invalid version")
+					except: print(" invalid version")
 					else:
 						run(conf["path"] + "/create", name, conf["path"] + "/setup/mindustry", ver, port)
 						conf["servers"][name] = {"ports": [(port if port != "" else "6567")], "group": (group if group != "" else "none")}
+				case "group":
+					name = input("  name: ")
+					ports = input("  ports: ")
+					ports = ports.split()
+					conf["groups"][name] = {"ports": ports}
 
 				case "help":
-					print("available servers: minecraft, mindustry")
-					print("name - name of the server")
-					print("group - group of the server")
-					print("port - port on which server will be available")
-					print("minecraft link - link where minecraft jar will be downloaded")
-					print("mindustry version - number of mindustry release")
+					print("  To create a group use create group")
+					print("  available servers: minecraft, mindustry")
+					print("  name - name of the server")
+					print("  group - group of the server")
+					print("  port - port on which server will be available")
+					print("  minecraft link - link where minecraft jar will be downloaded")
+					print("  mindustry version - number of mindustry release")
 
 				case _:
-					print("type of server not found")
+					print(" type of server not found")
 
 		case "start":
-			arg = input()
+			arg = getArg()
 			try:
 				server = conf["servers"][arg]
 			except:
-				print("Server not found.")
+				print(" Server not found.")
 			else:
 				args = ""
 				for i in conf["servers"][arg]["ports"]:
 					args += " -p " + i + ":" + i + " -p " + i + ":" + i + "/udp"
+				for i in conf["groups"][conf["servers"][args]["group"]]["ports"]:
+					args += " -p " + i + ":" + i + " -p " + i + ":" + i + "/udp"
 				run(["/usr/bin/docker", "run", "-itd", "--user", "server", "--name", arg.upper()] + args.split() + [arg, "bash", "-c", f"cd; ./server"])
-				print("Launched.")
+				print(" Launched.")
 
 		case "stop":
-			arg = input()
+			arg = getArg()
 			try:
 				server = conf["servers"][arg]
 			except:
@@ -103,60 +121,75 @@ while(True):
 				print("Stopped.")
 
 		case "attach":
-			arg = input()
+			arg = getArg()
 			try:
 				server = conf["servers"][arg]
 			except:
-				print("Server not found.")
+				print(" Server not found.")
 			else:
-				print("Type docker attach " + arg.upper() + " to attach to server console")
-				print("To detach press Control-P + Control-Q")
+				print(" Type docker attach " + arg.upper() + " to attach to server console")
+				print(" To detach press Control-P + Control-Q")
 
 		case "save":
-			arg = input()
+			arg = getArg()
 			try:
 				server = conf["servers"][arg]
 			except:
-				print("Server not found.")
+				print(" Server not found.")
 			else:
 				run(["/usr/bin/docker", "commit", arg.upper(), arg])
-				print("Done.")
+				print(" Done.")
 
 		case "remove":
-			arg = input()
+			arg = getArg()
 			try:
 				server = conf["servers"][arg]
 			except:
-				print("Server not found.")
+				print(" Server not found.")
 			else:
 				run(["/usr/bin/docker", "remove", arg.upper()])
-				print("Removed.")
+				print(" Removed.")
 
 		case "delete":
-			arg = input()
+			arg = getArg()
 			try:
 				server = conf["servers"][arg]
 			except:
-				print("Server not found.")
+				print(" Server not found.")
 			else:
 				run(["/usr/bin/docker", "rmi", arg.upper()])
 				conf["servers"].remove(arg)
-				print("Deleted.")
+				print(" Deleted.")
 
 		case "clear":
-			run(["/usr/bin/docker", "prune"])
-			print("Cleared.")
+			run(["/usr/bin/docker", "system", "prune"])
+			print(" Cleared.")
 
 		case "config":
-			arg = input()
-			match arg:
+			match getArg():
+
 				case "path":
-					path = input("path to directory: ")
+					path = input("  path to directory: ")
 					if (os.path.isdir(path)):
 						conf["path"] = path
-					else: print("Given path does not exists.")
+					else: print(" Given path does not exists.")
+
+				case "group":
+					group = input("  which group: ")
+					try:
+						grp = conf["groups"][group]
+					except KeyError:
+						print(" Group not found.")
+					else:
+						print("  ports: " + str(grp["ports"]))
+						print("  type nothing to leave field unchanged")
+						ports = input("  ports: ")
+						if (ports != ""):
+							conf["groups"][group]["ports"] = ports.split()
+
 				case "help":
-					print("path - path to directory where scripts for creating container placed")
+					print("  path - path to directory where scripts for creating container placed")
+					print("  group - group config")
 
 		case "exit":
 			configFile = open("/etc/dockerManagerConfig.json", "w")
@@ -164,19 +197,18 @@ while(True):
 			sys.exit(0)
 
 		case "help":
-			print("Use help in command to get available options")
-			print("create - create new image")
-			print("start - start container from image")
-			print("stop - stop container(still can be saved)")
-			print("attach - attach to container's console")
-			print("save - save container to image")
-			print("remove - remove stopped container")
-			print("delete - delete image")
-			print("clear - delete all stopped container, unused images, networks not used by at least one container")
-			print("config - change config of groups, containers, manager")
-			print("exit - exit manager")
-			print("help - print this message")
+			print(" Use help in command to get available options")
+			print(" create - create new image")
+			print(" start - start container from image")
+			print(" stop - stop container(still can be saved)")
+			print(" attach - attach to container's console")
+			print(" save - save container to image")
+			print(" remove - remove stopped container")
+			print(" delete - delete image")
+			print(" clear - delete all stopped container, unused images, networks not used by at least one container")
+			print(" config - change config of groups, containers, manager")
+			print(" exit - exit manager")
+			print(" help - print this message")
 
 		case _:
 			print("Unrecognized command. For command list type help")
-
